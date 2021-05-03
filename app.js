@@ -4,25 +4,16 @@ const schedule = require('node-schedule');
 const axios = require('axios');
 const fs = require('fs')
 
+app.get("/getStates", async (req, res) => {
+    try {
+        const statesResponse = await axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/states');
+        res.send(statesResponse.data.states)
+    } catch (error) {
+        console.error(error);
+    }
+})
 
-// axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/states')
-//     .then(res => {
-//         console.log(res.data.states)
-//         fs.writeFile('states.json', JSON.stringify(res.data.states), err => {
-//             if (err) {
-//                 console.error(err)
-//                 return
-//             }
-//             //file written successfully
-//         })
-//     })
-//     .catch(err => {
-//         console.log('Error: ', err.message);
-//     });
-
-const states = require('./states.json')
 var districts_fetched = []
-
 
 app.get("/getLocationData/:state_id", async (req, res) => {
     try {
