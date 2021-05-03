@@ -22,64 +22,45 @@ const fs = require('fs')
 
 const states = require('./states.json')
 console.log(states)
-var districts = []
-for (let index = 0; index < states.length; index++) {
-    const state = states[index];
+var districts_fetched = []
+var centers = []
+    const state = states[32];
     axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/districts/' + state['state_id'])
         .then(res => {
-            // console.log(res.data['districts'])
-            districts.push(...res.data['districts'])
-            // console.log(districts)
-            if (index === states.length - 1) {
+            districts_fetched = res.data['districts'];
                 setTimeout(() => {
-                    console.log(districts.length)
-                    fs.writeFile('districts.json', JSON.stringify(districts), err => {
-                        if (err) {
-                            console.error(err)
-                            return
-                        }
-                        //file written successfully
-                    })
+                    console.log(districts_fetched.length)
+                    for (let index = 0; index < districts_fetched.length; index++) {
+                        const district = districts_fetched[index];
+                        setTimeout(() => {
+                            axios.get('https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=' + district['district_id'] + '&date=04-05-2021')
+                                .then(res => {
+                                    // console.log(res.data['centers'])
+                                    centers.push(...res.data['centers'])
+                                    console.log(centers)
+                                    if (index === districts_fetched.length - 1) {
+                                        setTimeout(() => {
+                                            console.log(centers.length)
+                                            fs.writeFile('centers.json', JSON.stringify(centers), err => {
+                                                if (err) {
+                                                    console.error(err)
+                                                    return
+                                                }
+                                                //file written successfully
+                                            })
+                                        }, 3000);
+                                    }
+                                })
+                                .catch(err => {
+                                    console.log('Error: ', err.message);
+                                });
+                        }, 20);
+                    }
                 }, 2000);
-            }
         })
         .catch(err => {
             console.log('Error: ', err.message);
         });
-}
-// states.forEach((state) => {
-//     axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/districts/' + state['state_id'])
-//         .then(res => {
-//             // console.log(res.data['districts'])
-//             districts.push(...res.data['districts'])
-//             // if(districts.length) {
-//             //     districts.concat(res.data['districts'])
-//             // } else {
-//             //     districts = res.data['districts']
-//             // }
-//             console.log(districts)
-//         })
-//         .catch(err => {
-//             console.log('Error: ', err.message);
-//         });
-// })
-
-// axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/districts/32')
-//   .then(res => {
-//     console.log(res.data['districts'])
-//   })
-//   .catch(err => {
-//     console.log('Error: ', err.message);
-//   });
-
-//   axios.get('https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=581&date=04-05-2021')
-//   .then(res => {
-//     console.log(JSON.stringify(res.data))
-//   })
-//   .catch(err => {
-//     console.log('Error: ', err.message);
-//   });
-
 
 
 app.get("/getData", (req, res) => {
