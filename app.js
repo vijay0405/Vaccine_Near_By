@@ -21,50 +21,33 @@ const fs = require('fs')
 //     });
 
 const states = require('./states.json')
-console.log(states)
 var districts_fetched = []
-var centers = []
-    const state = states[32];
-    axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/districts/' + state['state_id'])
-        .then(res => {
-            districts_fetched = res.data['districts'];
-                setTimeout(() => {
-                    console.log(districts_fetched.length)
-                    for (let index = 0; index < districts_fetched.length; index++) {
-                        const district = districts_fetched[index];
-                        setTimeout(() => {
-                            axios.get('https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=' + district['district_id'] + '&date=04-05-2021')
-                                .then(res => {
-                                    // console.log(res.data['centers'])
-                                    centers.push(...res.data['centers'])
-                                    console.log(centers)
-                                    if (index === districts_fetched.length - 1) {
-                                        setTimeout(() => {
-                                            console.log(centers.length)
-                                            fs.writeFile('centers.json', JSON.stringify(centers), err => {
-                                                if (err) {
-                                                    console.error(err)
-                                                    return
-                                                }
-                                                //file written successfully
-                                            })
-                                        }, 3000);
-                                    }
-                                })
-                                .catch(err => {
-                                    console.log('Error: ', err.message);
-                                });
-                        }, 20);
-                    }
-                }, 2000);
-        })
-        .catch(err => {
-            console.log('Error: ', err.message);
-        });
 
 
-app.get("/getData", (req, res) => {
-    res.send("Hi you are not alone !!!");
+app.get("/getLocationData/:state_id", async (req, res) => {
+    try {
+        const districtsResponse = await axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/districts/' + req.params.state_id);
+        console.log(districtsResponse);
+        districts_fetched = districtsResponse.data['districts'];
+        var centers = []
+        console.log(districts_fetched.length)
+        for (let index = 0; index < districts_fetched.length; index++) {
+            const district = districts_fetched[index];
+            setTimeout(async () => {
+                const centersResponse = await axios.get('https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=' + district['district_id'] + '&date=04-05-2021')
+                centers.push(...centersResponse.data['centers'])
+                if (index === districts_fetched.length - 1) {
+                    setTimeout(() => {
+                        console.log(centers.length)
+                        res.send(centers)
+                    }, 500);
+                }
+            }, 50);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
 })
 
 
