@@ -52,6 +52,6 @@ app.get("/getLocationData/:state_id", async (req, res) => {
 })
 
 
-app.listen(3061, () => {
+app.listen(process.env.PORT || 3061, () => {
     console.log("listening on port 3061")
 })
