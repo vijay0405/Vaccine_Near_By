@@ -4,6 +4,16 @@ const schedule = require('node-schedule');
 const axios = require('axios');
 const fs = require('fs')
 
+
+app.get("/", async (req, res) => {
+    try {
+        res.send('testing connection');
+    } catch (error) {
+        console.error(error);
+    }
+})
+
+
 app.get("/getStates", async (req, res) => {
     try {
         const statesResponse = await axios.get('https://cdn-api.co-vin.in/api/v2/admin/location/states');
